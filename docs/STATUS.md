@@ -1,4 +1,54 @@
-# Status da primeira entrega
+# Status atual do roadmap
+
+
+O escopo foi ampliado pelo usuário para avançar sequencialmente até o fim do roadmap.
+As seções ao final são registro das entregas históricas, não o status atual.
+
+| Item | Estado atual | Evidência |
+|---|---|---|
+| 0, 1.1, 1.4 | Implementados | Fundação, cadastro e semáforo MQTT |
+| 1.2 | Implementado e validado localmente | HTTP e MQTT reais → JetStream → Timescale; reenvio não duplicou leitura |
+| 1.3 | Implementado e validado localmente | Histórico, último estado, três regras, alarmes e ações duráveis; smoke integrado passou |
+| 1.5 | Implementado e validado localmente | SQLite WAL cifrado, confirmação de aplicação após commit, sync por item; smoke rural e 72 h simuladas passaram |
+| 1.6 | Implementado; painéis ainda em validação | Keycloak real + TLS + token OIDC/RBAC passaram; contratos em /contratos/v1; adaptador legado e métricas criados |
+| 2 | Em implementação | Gêmeo desejado/relatado com reenvio testado; agregações/retenção validadas com rollback; exemplos em três linguagens |
+| 3 | Pendente | Ainda não declarar finalização do roadmap |
+
+Última regressão: 72 testes passaram, 78,15% de cobertura. Auditorias da plataforma
+e borda não encontraram vulnerabilidades conhecidas. Retenção automática não foi
+ativada: a revisão automática bloqueou exclusão futura; o SQL foi validado em uma
+transação com rollback, sem deixar políticas destrutivas ativas.
+Nenhuma medição de 1.000 mensagens/s ou ensaio físico de 72 horas
+foi concluído. Guia: [ingestão e borda](integrador/ingestao-e-borda.md).
+
+
+---
+
+## Historico das entregas anteriores
+
+# Status das entregas
+
+## Etapa atual — cadastro (1.1)
+
+Implementados: catálogo de domínios, perfis com grandezas/unidades/faixas/intervalos,
+hierarquia inquilino → site → área → dispositivo, persistência PostgreSQL, tokens por
+dispositivo, revogação, listagens paginadas, cálculo de status por perfil e geração de ACLs.
+Domínios e perfis iniciais são dados em JSON, sem ramificações por domínio no núcleo.
+
+Validação: **51 testes passaram, 97,28% de cobertura no núcleo configurado**; lint e ambos
+os contratos OpenAPI validados; auditoria do registry sem vulnerabilidades conhecidas.
+O broker real aceitou o hash exportado, negou tópicos alheios/publicação de comandos e
+recusou a credencial revogada após exportação e reinício. API e PostgreSQL iniciaram saudáveis.
+
+Limites explícitos: autenticação administrativa local por token, até o Keycloak (1.6);
+unidades UCUM limitadas ao catálogo configurável; heartbeat autenticado para o status,
+até a integração com ingestão (1.2); revogação MQTT exige exportação e reinício administrativo.
+CI atualizado com banco e smoke test; execução no GitHub depende de push.
+
+Guia: [cadastro e credenciais](integrador/cadastro.md). Decisão: [ADR-007](adr/ADR-007-registry.md).
+**Próxima etapa: 1.2 — ingestão MQTT/HTTP/lote, validação, deduplicação e publicação no NATS.**
+
+## Histórico — primeira entrega
 
 Escopo confirmado: **fundação + semáforo MQTT**, conforme fases 0 e 1.4 do roadmap.
 O roadmap original está preservado em `docs/ROADMAP.md`; os itens futuros não são
@@ -40,8 +90,7 @@ borda. A deduplicação de comandos é volátil e não garante execução única
 O estado retido representa o último relato, não comprova conexão atual. TLS externo,
 identidade central e isolamento multi-inquilino da API pertencem ao MVP da plataforma.
 
-PostgreSQL e NATS foram provisionados, mas não estão conectados à ingestão. Catálogo,
-persistência de telemetria, regras, borda, Keycloak e fases 2/3 permanecem pendentes.
-O próximo passo é o fluxo vertical cadastro → ingestão MQTT/HTTP → NATS → armazenamento → API.
+Na primeira entrega, PostgreSQL e NATS foram apenas provisionados. O catálogo foi entregue
+na etapa 1.1 acima; persistência de telemetria, regras, borda, Keycloak e fases 2/3 permanecem pendentes.
 
 Instruções completas: [primeira demonstração](integrador/primeira-demo.md).

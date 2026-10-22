@@ -1,0 +1,45 @@
+{
+  "unidades_ucum": ["1", "%", "s", "ms", "min", "h", "Cel", "K", "m", "cm", "mm", "m/s", "m3", "L", "kg", "g", "Pa", "hPa", "V", "A", "W", "kW", "Hz", "lx"],
+  "dominios": [
+    {"id": "mobilidade", "nome": "Mobilidade urbana"},
+    {"id": "agricultura", "nome": "Agricultura"}
+  ],
+  "perfis": [
+    {
+      "id": "semaforo-v1", "nome": "Semáforo de travessia", "dominio": "mobilidade",
+      "intervalo_esperado_s": 5, "tolerancia_intervalos": 3,
+      "configuraveis": ["wait", "crossing", "roi"],
+      "campos": {
+        "estado": {
+          "wait": {"tipo": "numero", "minimo": 1, "maximo": 60},
+          "crossing": {"tipo": "numero", "minimo": 2, "maximo": 60},
+          "roi": {"tipo": "vetor", "tamanho": 4, "minimo": 0, "maximo": 1, "retangulo": true},
+          "modo": {"tipo": "enum", "valores": ["demo", "camera"]},
+          "running": {"tipo": "booleano"}
+        },
+        "evento": {
+          "evento": {"tipo": "enum", "valores": ["transicao_fase"]},
+          "origem": {"tipo": "enum", "valores": ["idle", "yellow", "crossing"]},
+          "destino": {"tipo": "enum", "valores": ["idle", "yellow", "crossing"]}
+        }
+      },
+      "grandezas": {
+        "pedestres_na_area": {"unidade": "1", "minimo": 0, "maximo": 10000},
+        "tempo_espera_s": {"unidade": "s", "minimo": 0, "maximo": 3600},
+        "ciclos": {"unidade": "1", "minimo": 0, "maximo": 1000000000}
+      }
+    },
+    {
+      "id": "solo-horario-v1", "nome": "Sensor de solo horário", "dominio": "agricultura",
+      "intervalo_esperado_s": 3600, "tolerancia_intervalos": 3,
+      "campos": {
+        "evento": {"evento": {"tipo": "enum", "valores": ["regra_local"]}, "ativo": {"tipo": "booleano"}},
+        "estado": {"irrigando": {"tipo": "booleano"}}
+      },
+      "grandezas": {
+        "umidade_solo": {"unidade": "%", "minimo": 0, "maximo": 100},
+        "temperatura_solo": {"unidade": "Cel", "minimo": -40, "maximo": 80}
+      }
+    }
+  ]
+}

@@ -1,0 +1,564 @@
+openapi: 3.1.0
+info:
+  title: Plataforma IoT — Dados
+  version: 1.0.0
+paths:
+  /api/v1/dispositivos/{device_id}/ultimo-estado:
+    get:
+      summary: Last State
+      operationId: last_state_api_v1_dispositivos__device_id__ultimo_estado_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Device Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/dispositivos/{device_id}/gemeo/desejado:
+    put:
+      summary: Desired State
+      operationId: desired_state_api_v1_dispositivos__device_id__gemeo_desejado_put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Device Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/dispositivos/{device_id}/gemeo:
+    get:
+      summary: Twin
+      operationId: twin_api_v1_dispositivos__device_id__gemeo_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Device Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/telemetria:
+    get:
+      summary: Telemetry
+      operationId: telemetry_api_v1_telemetria_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: dispositivo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            pattern: ^[a-zA-Z0-9_-]{1,64}$
+          - type: 'null'
+          title: Dispositivo
+      - name: grandeza
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            pattern: ^[a-zA-Z0-9_-]{1,64}$
+          - type: 'null'
+          title: Grandeza
+      - name: inicio
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Inicio
+      - name: fim
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Fim
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - time
+          - -time
+          - valor
+          - -valor
+          type: string
+          default: -time
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ingestao/rejeitadas:
+    get:
+      summary: Rejected
+      operationId: rejected_api_v1_ingestao_rejeitadas_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: -id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/regras:
+    post:
+      summary: Create Rule
+      operationId: create_rule_api_v1_regras_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rule'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Rules
+      operationId: rules_api_v1_regras_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/alarmes:
+    get:
+      summary: Alarms
+      operationId: alarms_api_v1_alarmes_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: -occurred_at
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/alarmes/{alarm_id}/reconhecer:
+    post:
+      summary: Acknowledge
+      operationId: acknowledge_api_v1_alarmes__alarm_id__reconhecer_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: alarm_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Alarm Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/acoes:
+    get:
+      summary: Actions
+      operationId: actions_api_v1_acoes_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: -id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Action:
+      properties:
+        tipo:
+          type: string
+          enum:
+          - alarme
+          - webhook
+          - topico
+          - comando
+          title: Tipo
+          default: alarme
+        destino:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+          title: Destino
+        dados:
+          additionalProperties: true
+          type: object
+          title: Dados
+      additionalProperties: false
+      type: object
+      title: Action
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Rule:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        dispositivo:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Dispositivo
+        tipo:
+          type: string
+          enum:
+          - limite
+          - ausencia
+          - janela
+          title: Tipo
+        grandeza:
+          anyOf:
+          - type: string
+            pattern: ^[a-zA-Z0-9_-]{1,64}$
+          - type: 'null'
+          title: Grandeza
+        operador:
+          type: string
+          enum:
+          - gt
+          - ge
+          - lt
+          - le
+          title: Operador
+          default: gt
+        limite:
+          type: number
+          title: Limite
+          default: 0
+        janela_s:
+          type: integer
+          maximum: 2592000.0
+          minimum: 1.0
+          title: Janela S
+          default: 60
+        severidade:
+          type: string
+          enum:
+          - info
+          - aviso
+          - critico
+          title: Severidade
+          default: aviso
+        acoes:
+          items:
+            $ref: '#/components/schemas/Action'
+          type: array
+          maxItems: 10
+          minItems: 1
+          title: Acoes
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - dispositivo
+      - tipo
+      title: Rule
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer

@@ -1,0 +1,7 @@
+{
+  "identidade":{"inquilino":"cooperativa","site":"fazenda","dominio":"agricultura","dispositivo":"solo-01"},
+  "campos":{
+    "umidade_solo":{"origem":"sensor.moisture","unidade":"%","escala":100},
+    "temperatura_solo":{"origem":"sensor.temperature","unidade":"Cel"}
+  }
+}

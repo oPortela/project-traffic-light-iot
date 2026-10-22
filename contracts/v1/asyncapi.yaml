@@ -1,0 +1,53 @@
+asyncapi: 2.6.0
+id: urn:plataforma-iot:mqtt:1.0
+tags:
+  - name: iot
+info:
+  title: Plataforma IoT — MQTT
+  version: 1.0.0
+  description: Perspectiva do dispositivo. QoS 1; consumidores devem deduplicar id_mensagem.
+defaultContentType: application/json
+servers:
+  local:
+    url: localhost:1883
+    protocol: mqtt
+    security:
+      - deviceCredentials: []
+channels:
+  '{inquilino}/{site}/{dominio}/{dispositivo}/telemetria':
+    parameters: &identity
+      inquilino: {description: Identificador do inquilino}
+      site: {description: Identificador do local}
+      dominio: {description: Domínio cadastrado}
+      dispositivo: {description: Identificador do dispositivo}
+    publish:
+      operationId: publishTelemetry
+      message: {$ref: '#/components/messages/canonical'}
+      bindings: {mqtt: {qos: 1, retain: false, bindingVersion: '0.2.0'}}
+  '{inquilino}/{site}/{dominio}/{dispositivo}/evento':
+    parameters: *identity
+    publish:
+      operationId: publishEvent
+      message: {$ref: '#/components/messages/canonical'}
+      bindings: {mqtt: {qos: 1, retain: false, bindingVersion: '0.2.0'}}
+  '{inquilino}/{site}/{dominio}/{dispositivo}/estado':
+    parameters: *identity
+    publish:
+      operationId: publishReportedState
+      message: {$ref: '#/components/messages/canonical'}
+      bindings: {mqtt: {qos: 1, retain: true, bindingVersion: '0.2.0'}}
+  '{inquilino}/{site}/{dominio}/{dispositivo}/comando':
+    parameters: *identity
+    subscribe:
+      operationId: receiveCommand
+      message: {$ref: '#/components/messages/canonical'}
+      bindings: {mqtt: {qos: 1, retain: false, bindingVersion: '0.2.0'}}
+components:
+  securitySchemes:
+    deviceCredentials: {type: userPassword}
+  messages:
+    canonical:
+      name: canonical
+      schemaFormat: application/schema+json;version=draft-07
+      payload:
+        $ref: './schemas/canonical-1.0.json'

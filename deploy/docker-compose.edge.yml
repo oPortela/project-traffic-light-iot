@@ -1,0 +1,40 @@
+services:
+  edge-mosquitto:
+    image: eclipse-mosquitto:2.0
+    ports: ['127.0.0.1:1885:1883']
+    volumes:
+      - ./edge/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./secrets/edge-passwords:/mosquitto/config/passwords:ro
+      - ./secrets/edge-acl:/mosquitto/config/acl:ro
+      - edge-broker:/mosquitto/data
+    restart: unless-stopped
+  edge:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.edge
+    environment:
+      EDGE_CONFIG_FILE: /run/secrets/edge-config.json
+      EDGE_KEY_FILE: /run/secrets/edge.key
+      MQTT_HOST: edge-mosquitto
+    volumes:
+      - ./secrets/edge-config.json:/run/secrets/edge-config.json:ro
+      - ./secrets/edge.key:/run/secrets/edge.key:ro
+      - edge-queue:/data
+    depends_on: [edge-mosquitto]
+    restart: unless-stopped
+  soil-sensor-sim:
+    profiles: ['soil-demo']
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.edge
+    command: ['python', 'projects/soil-sensor-sim/main.py']
+    environment:
+      SOIL_CONFIG_FILE: /run/secrets/soil-config.json
+      MQTT_HOST: edge-mosquitto
+    volumes:
+      - ./secrets/soil-config.json:/run/secrets/soil-config.json:ro
+    depends_on: [edge-mosquitto]
+    restart: unless-stopped
+volumes:
+  edge-queue:
+  edge-broker:

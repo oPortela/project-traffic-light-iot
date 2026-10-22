@@ -1,0 +1,91 @@
+services:
+  registry:
+    environment:
+      MQTT_BRIDGE_CREDENTIALS: /run/secrets/mqtt-bridge.json
+      MQTT_ACTION_CREDENTIALS: /run/secrets/mqtt-actions.json
+    volumes:
+      - ./secrets/mqtt-bridge.json:/run/secrets/mqtt-bridge.json:ro
+      - ./secrets/mqtt-actions.json:/run/secrets/mqtt-actions.json:ro
+  ingestion:
+    profiles: ["platform"]
+    build: &platform-build
+      context: ..
+      dockerfile: deploy/Dockerfile.platform
+    environment: &platform-env
+      PGHOST: postgres
+      PGDATABASE: iot
+      PGUSER: iot
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+      NATS_URL: nats://nats:4222
+    ports: ['127.0.0.1:8002:8002']
+    depends_on:
+      registry: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  outbox:
+    profiles: ["platform"]
+    build: *platform-build
+    environment: *platform-env
+    command: ["python", "-m", "ingestion_service.outbox"]
+    restart: unless-stopped
+    depends_on:
+      ingestion: {condition: service_healthy}
+      nats: {condition: service_healthy}
+  mqtt-bridge:
+    profiles: ["platform-mqtt"]
+    build: *platform-build
+    environment:
+      <<: *platform-env
+      MQTT_HOST: registry-mosquitto
+      MQTT_BRIDGE_CREDENTIALS: /run/secrets/mqtt-bridge.json
+    volumes:
+      - ./secrets/mqtt-bridge.json:/run/secrets/mqtt-bridge.json:ro
+    command: ["python", "-m", "ingestion_service.mqtt"]
+    restart: unless-stopped
+    depends_on:
+      ingestion: {condition: service_healthy}
+      registry-mosquitto: {condition: service_healthy}
+  data-api:
+    profiles: ["platform"]
+    build: *platform-build
+    environment:
+      <<: *platform-env
+      REGISTRY_ADMINS_FILE: /run/secrets/registry-admins.json
+      WEBHOOK_ALLOWED_HOSTS: ${WEBHOOK_ALLOWED_HOSTS:-}
+    volumes:
+      - ./secrets/registry-admins.json:/run/secrets/registry-admins.json:ro
+    command: ["python", "-m", "uvicorn", "ingestion_service.query_api:app", "--host", "0.0.0.0", "--port", "8003"]
+    ports: ['127.0.0.1:8003:8003']
+    depends_on:
+      ingestion: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  storage-writer:
+    profiles: ["platform"]
+    build: *platform-build
+    environment: *platform-env
+    command: ["python", "-m", "ingestion_service.storage"]
+    restart: unless-stopped
+    depends_on:
+      ingestion: {condition: service_healthy}
+      nats: {condition: service_healthy}
+  rules-worker:
+    profiles: ["platform"]
+    build: *platform-build
+    environment:
+      <<: *platform-env
+      MQTT_HOST: registry-mosquitto
+      MQTT_ACTION_CREDENTIALS: /run/secrets/mqtt-actions.json
+      WEBHOOK_ALLOWED_HOSTS: ${WEBHOOK_ALLOWED_HOSTS:-}
+    volumes:
+      - ./secrets/mqtt-actions.json:/run/secrets/mqtt-actions.json:ro
+    command: ["python", "-m", "ingestion_service.actions"]
+    restart: unless-stopped
+    depends_on:
+      data-api: {condition: service_healthy}

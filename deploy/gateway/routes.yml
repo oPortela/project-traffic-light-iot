@@ -1,0 +1,56 @@
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/server.crt
+        keyFile: /certs/server.key
+  certificates:
+    - certFile: /certs/server.crt
+      keyFile: /certs/server.key
+  options:
+    default:
+      minVersion: VersionTLS12
+http:
+  middlewares:
+    limited:
+      rateLimit: {average: 1000, burst: 2000}
+    bounded:
+      buffering: {maxRequestBodyBytes: 16777216}
+  routers:
+    auth:
+      rule: Host(`auth.localhost`)
+      service: auth
+      tls: {}
+    registry:
+      rule: Host(`registry.localhost`) && !PathPrefix(`/metrics`)
+      service: registry
+      tls: {}
+      middlewares: [limited, bounded]
+    ingestion:
+      rule: Host(`ingest.localhost`) && !PathPrefix(`/metrics`)
+      service: ingestion
+      tls: {}
+      middlewares: [limited, bounded]
+    data:
+      rule: Host(`data.localhost`) && !PathPrefix(`/metrics`)
+      service: data
+      tls: {}
+      middlewares: [limited, bounded]
+    portal:
+      rule: Host(`portal.localhost`) && !PathPrefix(`/metrics`)
+      service: data
+      tls: {}
+      middlewares: [limited, bounded]
+  services:
+    auth:
+      loadBalancer:
+        servers: [{url: 'http://keycloak:8080'}]
+    registry:
+      loadBalancer:
+        servers: [{url: 'http://registry:8001'}]
+    ingestion:
+      loadBalancer:
+        servers: [{url: 'http://ingestion:8002'}]
+    data:
+      loadBalancer:
+        servers: [{url: 'http://data-api:8003'}]

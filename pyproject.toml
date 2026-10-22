@@ -1,6 +1,6 @@
 [tool.pytest.ini_options]
-pythonpath = ["projects/traffic-light", "."]
-testpaths = ["projects/traffic-light/tests", "tests"]
+pythonpath = ["projects/traffic-light", "platform/registry", "platform/ingestion", "edge", "."]
+testpaths = ["projects/traffic-light/tests", "platform/registry/tests", "platform/ingestion/tests", "edge/tests", "tests"]
 
 [tool.ruff]
 target-version = "py312"
@@ -10,7 +10,7 @@ line-length = 120
 select = ["E4", "E7", "E9", "F"]
 
 [tool.coverage.run]
-source = ["app.controller", "app.integration", "iot_shared"]
+source = ["app.controller", "app.integration", "iot_shared", "registry_service", "ingestion_service", "edge_service"]
 
 [tool.coverage.report]
 fail_under = 70

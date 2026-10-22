@@ -1,0 +1,3 @@
+-r requirements-core.txt
+psycopg[binary]>=3.2,<4
+PyJWT[crypto]>=2.10,<3

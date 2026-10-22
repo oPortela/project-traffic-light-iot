@@ -6,10 +6,12 @@ attrs==26.1.0
 boolean.py==5.0
 CacheControl==0.14.4
 certifi==2026.10.19
+cffi==2.1.1
 charset-normalizer==3.5.2
 click==8.5.0
 colorama==0.4.6
 coverage==7.16.2
+cryptography==50.0.2
 cyclonedx-python-lib==11.12.0
 defusedxml==0.7.1
 fastapi==0.159.1
@@ -29,6 +31,7 @@ license-expression==30.4.4
 markdown-it-py==4.2.0
 mdurl==0.1.2
 msgpack==1.2.3
+nats-py==2.16.0
 opentelemetry-api==1.45.1
 packageurl-python==0.17.6
 packaging==26.3
@@ -38,10 +41,15 @@ pip_api==0.0.35
 pip_audit==2.10.1
 platformdirs==4.13.5
 pluggy==1.7.0
+prometheus_client==0.26.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
 py-serializable==2.1.0
+pycparser==3.12
 pydantic==2.14.1
 pydantic_core==2.50.1
 Pygments==2.21.0
+PyJWT==2.15.1
 pyparsing==3.3.3
 pytest==8.4.2
 pytest-cov==6.3.0

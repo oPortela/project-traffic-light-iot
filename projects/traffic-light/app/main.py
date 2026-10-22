@@ -149,7 +149,10 @@ async def lifespan(app):
 
         def on_command(data):
             if data["acao"] == "config":
-                configure(Configuration.model_validate(data.get("parametros", {})))
+                with lock:
+                    current = {"wait": controller.settings.wait, "crossing": controller.settings.crossing,
+                               "roi": list(state["roi"])}
+                    configure(Configuration.model_validate({**current, **data.get("parametros", {})}))
             elif data["acao"] in ("start", "stop", "reset"):
                 params = data.get("parametros", {})
                 control(Command(action=data["acao"], mode=params.get("mode", "demo")))

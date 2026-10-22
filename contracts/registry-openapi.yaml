@@ -1,0 +1,941 @@
+openapi: 3.1.0
+info:
+  title: Plataforma IoT — Registry
+  version: 1.0.0
+paths:
+  /api/v1/catalogo/dominios:
+    post:
+      summary: Create Domain
+      operationId: create_domain_api_v1_catalogo_dominios_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Named'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Named'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: List Dominios
+      operationId: list_dominios_api_v1_catalogo_dominios_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - id
+          - -id
+          - nome
+          - -nome
+          type: string
+          default: id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/perfis:
+    post:
+      summary: Create Profile
+      operationId: create_profile_api_v1_perfis_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: List Perfis
+      operationId: list_perfis_api_v1_perfis_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - id
+          - -id
+          - nome
+          - -nome
+          type: string
+          default: id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sites:
+    post:
+      summary: Create Site
+      operationId: create_site_api_v1_sites_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Named'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Named'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: List Sites
+      operationId: list_sites_api_v1_sites_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - id
+          - -id
+          - nome
+          - -nome
+          type: string
+          default: id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sites/{site_id}/areas:
+    post:
+      summary: Create Area
+      operationId: create_area_api_v1_sites__site_id__areas_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: site_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Site Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Named'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: List Areas
+      operationId: list_areas_api_v1_sites__site_id__areas_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: site_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Site Id
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - id
+          - -id
+          - nome
+          - -nome
+          type: string
+          default: id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/dispositivos:
+    post:
+      summary: Create Device
+      operationId: create_device_api_v1_dispositivos_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedDevice'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: List Dispositivos
+      operationId: list_dispositivos_api_v1_dispositivos_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          title: Page
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Size
+      - name: sort
+        in: query
+        required: false
+        schema:
+          enum:
+          - id
+          - -id
+          - nome
+          - -nome
+          type: string
+          default: id
+          title: Sort
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 160
+          default: ''
+          title: Filter
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/dispositivos/{device_id}:
+    get:
+      summary: Get Device
+      operationId: get_device_api_v1_dispositivos__device_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Device Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceView'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/dispositivos/{device_id}/credenciais:
+    delete:
+      summary: Revoke
+      operationId: revoke_api_v1_dispositivos__device_id__credenciais_delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Device Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Revocation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/dispositivos/{device_id}/heartbeat:
+    post:
+      summary: Heartbeat
+      operationId: heartbeat_api_v1_dispositivos__device_id__heartbeat_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: device_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Device Id
+      - name: inquilino
+        in: query
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Inquilino
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Area:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        nome:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Nome
+        site:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Site
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - nome
+      - site
+      title: Area
+    CreatedDevice:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        nome:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Nome
+        site:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Site
+        area:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Area
+        perfil:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Perfil
+        dominio:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Dominio
+        mqtt_username:
+          type: string
+          title: Mqtt Username
+        topico_base:
+          type: string
+          title: Topico Base
+        ultimo_contato:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Ultimo Contato
+        credencial_revogada:
+          type: boolean
+          title: Credencial Revogada
+        status:
+          type: string
+          title: Status
+        intervalo_esperado_s:
+          type: integer
+          title: Intervalo Esperado S
+        tolerancia_intervalos:
+          type: integer
+          title: Tolerancia Intervalos
+        credencial:
+          $ref: '#/components/schemas/Credential'
+        mqtt_aplicacao_pendente:
+          type: boolean
+          title: Mqtt Aplicacao Pendente
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - nome
+      - site
+      - area
+      - perfil
+      - dominio
+      - mqtt_username
+      - topico_base
+      - ultimo_contato
+      - credencial_revogada
+      - status
+      - intervalo_esperado_s
+      - tolerancia_intervalos
+      - credencial
+      - mqtt_aplicacao_pendente
+      title: CreatedDevice
+    Credential:
+      properties:
+        usuario:
+          type: string
+          title: Usuario
+        token:
+          type: string
+          title: Token
+      additionalProperties: false
+      type: object
+      required:
+      - usuario
+      - token
+      title: Credential
+    DataField:
+      properties:
+        tipo:
+          type: string
+          enum:
+          - numero
+          - booleano
+          - enum
+          - vetor
+          title: Tipo
+        valores:
+          items:
+            type: string
+          type: array
+          maxItems: 100
+          title: Valores
+        tamanho:
+          type: integer
+          maximum: 16.0
+          minimum: 1.0
+          title: Tamanho
+          default: 4
+        minimo:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Minimo
+        maximo:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Maximo
+        retangulo:
+          type: boolean
+          title: Retangulo
+          default: false
+      additionalProperties: false
+      type: object
+      required:
+      - tipo
+      title: DataField
+    Device:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        nome:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Nome
+        site:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Site
+        area:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Area
+        perfil:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Perfil
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - nome
+      - site
+      - area
+      - perfil
+      title: Device
+    DeviceView:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        nome:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Nome
+        site:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Site
+        area:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Area
+        perfil:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Perfil
+        dominio:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Dominio
+        mqtt_username:
+          type: string
+          title: Mqtt Username
+        topico_base:
+          type: string
+          title: Topico Base
+        ultimo_contato:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Ultimo Contato
+        credencial_revogada:
+          type: boolean
+          title: Credencial Revogada
+        status:
+          type: string
+          title: Status
+        intervalo_esperado_s:
+          type: integer
+          title: Intervalo Esperado S
+        tolerancia_intervalos:
+          type: integer
+          title: Tolerancia Intervalos
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - nome
+      - site
+      - area
+      - perfil
+      - dominio
+      - mqtt_username
+      - topico_base
+      - ultimo_contato
+      - credencial_revogada
+      - status
+      - intervalo_esperado_s
+      - tolerancia_intervalos
+      title: DeviceView
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Measurement:
+      properties:
+        unidade:
+          type: string
+          maxLength: 32
+          minLength: 1
+          pattern: ^\S+$
+          title: Unidade
+        minimo:
+          type: number
+          title: Minimo
+        maximo:
+          type: number
+          title: Maximo
+      additionalProperties: false
+      type: object
+      required:
+      - unidade
+      - minimo
+      - maximo
+      title: Measurement
+    Named:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        nome:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Nome
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - nome
+      title: Named
+    Page:
+      properties:
+        page:
+          type: integer
+          title: Page
+        size:
+          type: integer
+          title: Size
+        total:
+          type: integer
+          title: Total
+        items:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Items
+      additionalProperties: false
+      type: object
+      required:
+      - page
+      - size
+      - total
+      - items
+      title: Page
+    Profile:
+      properties:
+        id:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Id
+        nome:
+          type: string
+          maxLength: 160
+          minLength: 1
+          title: Nome
+        dominio:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{1,64}$
+          title: Dominio
+        intervalo_esperado_s:
+          type: integer
+          maximum: 31536000.0
+          minimum: 1.0
+          title: Intervalo Esperado S
+        tolerancia_intervalos:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Tolerancia Intervalos
+          default: 3
+        grandezas:
+          patternProperties:
+            ^[a-zA-Z0-9_-]{1,64}$:
+              $ref: '#/components/schemas/Measurement'
+          type: object
+          maxProperties: 100
+          minProperties: 1
+          title: Grandezas
+        campos:
+          additionalProperties:
+            patternProperties:
+              ^[a-zA-Z0-9_-]{1,64}$:
+                $ref: '#/components/schemas/DataField'
+            type: object
+          propertyNames:
+            enum:
+            - estado
+            - evento
+          type: object
+          title: Campos
+        configuraveis:
+          items:
+            type: string
+            pattern: ^[a-zA-Z0-9_-]{1,64}$
+          type: array
+          maxItems: 100
+          title: Configuraveis
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - nome
+      - dominio
+      - intervalo_esperado_s
+      - grandezas
+      title: Profile
+    Revocation:
+      properties:
+        revogado:
+          type: boolean
+          title: Revogado
+        mqtt_aplicacao_pendente:
+          type: boolean
+          title: Mqtt Aplicacao Pendente
+      additionalProperties: false
+      type: object
+      required:
+      - revogado
+      - mqtt_aplicacao_pendente
+      title: Revocation
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    HTTPBearer:
+      type: http
+      scheme: bearer

@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONPATH=/app:/app/platform/registry
+COPY requirements-core.txt requirements-registry.txt requirements-dev-lock.txt ./
+RUN pip install --no-cache-dir -c requirements-dev-lock.txt -r requirements-registry.txt
+COPY platform/registry ./platform/registry
+COPY iot_shared ./iot_shared
+COPY contracts ./contracts
+RUN useradd --create-home iot
+USER iot
+EXPOSE 8001
+CMD ["python", "-m", "uvicorn", "registry_service.api:app", "--app-dir", "platform/registry", "--host", "0.0.0.0", "--port", "8001"]

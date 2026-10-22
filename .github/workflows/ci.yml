@@ -3,8 +3,48 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  platform-smoke:
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE_PROJECT_NAME: platform-ci
+      COMPOSE_FILE: deploy/docker-compose.yml:deploy/docker-compose.registry.yml:deploy/docker-compose.platform.yml
+      COMPOSE_PROFILES: registry,platform,registry-mqtt,platform-mqtt
+      POSTGRES_PASSWORD: ci-platform-only
+      MQTT_PASSWORD: unused
+      REGISTRY_ADMINS_FILE: deploy/secrets/registry-admins.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev-lock.txt
+      - run: python scripts/init_registry.py --tenant semob
+      - run: docker compose up -d --build --wait --wait-timeout 180 registry ingestion outbox data-api storage-writer rules-worker
+      - run: python scripts/smoke_platform.py
+      - run: python scripts/provision_demo.py
+      - run: docker compose exec -T registry python -m registry_service.broker --output /mosquitto-export
+      - run: docker compose up -d --build --wait --wait-timeout 120 registry-mosquitto mqtt-bridge
+      - run: python scripts/smoke_device_pipeline.py --device-file deploy/secrets/solo-device.json --mqtt-port 1884
+      - name: Logs and cleanup
+        if: always()
+        run: |
+          docker compose logs --no-color --tail 50
+          docker compose down -v
   tests:
     runs-on: ubuntu-latest
+    services:
+      registry-db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: registry_test
+          POSTGRES_USER: iot
+          POSTGRES_PASSWORD: ci-registry-test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U iot -d registry_test"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_REGISTRY_DATABASE_URL: postgresql://iot:ci-registry-test@127.0.0.1:5432/registry_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -16,6 +56,9 @@ jobs:
       - run: pytest --cov --cov-report=term-missing
       - run: python scripts/validate_contracts.py
       - run: pip-audit -r requirements-core.txt
+      - run: pip-audit -r requirements-registry.txt
+      - run: pip-audit -r requirements-platform.txt
+      - run: pip-audit -r requirements-edge.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -52,3 +95,34 @@ jobs:
         env:
           POSTGRES_PASSWORD: ci-database
           MQTT_PASSWORD: ci-device
+  registry-smoke:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: ci-registry
+      MQTT_PASSWORD: unused-registry-test
+      REGISTRY_DATABASE_URL: postgresql://iot:ci-registry@127.0.0.1:15433/iot
+      REGISTRY_ADMINS_FILE: deploy/secrets/registry-admins.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev-lock.txt
+      - run: python scripts/init_registry.py --tenant semob
+      - name: Start registry and database
+        run: docker compose -p registry-ci -f deploy/docker-compose.yml -f deploy/docker-compose.registry.yml -f deploy/docker-compose.registry-test.yml --profile registry up -d --build --wait --wait-timeout 180 registry
+      - run: python scripts/smoke_registry.py provision --broker-output deploy/secrets/registry-broker
+      - name: Start generated broker configuration
+        run: docker compose -p registry-ci -f deploy/docker-compose.yml -f deploy/docker-compose.registry.yml -f deploy/docker-compose.registry-test.yml --profile registry-mqtt up -d --wait registry-mosquitto
+      - run: python scripts/smoke_registry.py check
+      - run: python scripts/smoke_registry.py revoke --broker-output deploy/secrets/registry-broker
+      - name: Apply revocation and disconnect existing sessions
+        run: |
+          docker compose -p registry-ci -f deploy/docker-compose.yml -f deploy/docker-compose.registry.yml -f deploy/docker-compose.registry-test.yml --profile registry-mqtt restart registry-mosquitto
+          docker compose -p registry-ci -f deploy/docker-compose.yml -f deploy/docker-compose.registry.yml -f deploy/docker-compose.registry-test.yml --profile registry-mqtt up -d --wait registry-mosquitto
+      - run: python scripts/smoke_registry.py rejected
+      - name: Logs and cleanup
+        if: always()
+        run: |
+          docker compose -p registry-ci -f deploy/docker-compose.yml -f deploy/docker-compose.registry.yml -f deploy/docker-compose.registry-test.yml --profile registry --profile registry-mqtt logs --no-color
+          docker compose -p registry-ci -f deploy/docker-compose.yml -f deploy/docker-compose.registry.yml -f deploy/docker-compose.registry-test.yml --profile registry --profile registry-mqtt down -v

@@ -51,3 +51,22 @@ class TestApi:
             result = client.post('/api/control', json={'action':'stop'}).json()
             assert result['waited'] == 0
             assert not result['presence']
+
+    def test_remote_configuration_merges_only_desired_difference(self, monkeypatch):
+        from unittest.mock import Mock
+        callbacks = {}
+
+        def publisher(identity, on_command, on_reconnect):
+            callbacks['command'] = on_command
+            return Mock()
+
+        monkeypatch.setenv('MQTT_HOST', 'unused-test-broker')
+        monkeypatch.setattr('app.integration.MqttPublisher', publisher)
+        with TestClient(app) as client:
+            client.post('/api/control', json={'action': 'stop'})
+            client.post('/api/config', json={'wait': 10, 'crossing': 12, 'roi': [.1, .2, .8, .9]})
+            callbacks['command']({'acao': 'config', 'parametros': {'wait': 15}})
+            from app.main import controller, state
+            assert controller.settings.wait == 15
+            assert controller.settings.crossing == 12
+            assert state['roi'] == [.1, .2, .8, .9]

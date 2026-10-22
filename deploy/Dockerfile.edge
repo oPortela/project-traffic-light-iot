@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONPATH=/app:/app/edge
+COPY requirements-core.txt requirements-edge.txt requirements-dev-lock.txt ./
+RUN pip install --no-cache-dir -c requirements-dev-lock.txt -r requirements-edge.txt
+COPY edge ./edge
+COPY projects/soil-sensor-sim ./projects/soil-sensor-sim
+COPY iot_shared ./iot_shared
+COPY contracts ./contracts
+RUN useradd --create-home iot && mkdir /data && chown iot:iot /data
+USER iot
+CMD ["python", "-m", "edge_service.main"]

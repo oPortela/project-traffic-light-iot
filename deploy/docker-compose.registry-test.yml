@@ -1,0 +1,4 @@
+# Local/CI tests only. Do not include this overlay in normal deployment.
+services:
+  postgres:
+    ports: ['127.0.0.1:15433:5432']

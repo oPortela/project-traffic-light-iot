@@ -3,7 +3,8 @@
 > **Primeira entrega do roadmap:** monorepo, contratos canônico/AsyncAPI/OpenAPI,
 > infraestrutura Compose e semáforo MQTT. Guia: [primeira demonstração](docs/integrador/primeira-demo.md).
 > Veja [status e limites](docs/STATUS.md), [roadmap completo](docs/ROADMAP.md) e [ADRs](docs/adr/).
-> Catálogo, ingestão central, regras e borda pertencem às próximas entregas.
+> **Etapa 1.1 entregue:** catálogo, perfis, locais, dispositivos e credenciais em PostgreSQL.
+> Veja o [guia de cadastro](docs/integrador/cadastro.md). Ingestão central, regras e borda continuam nas próximas etapas.
 
 Sistema de monitoramento e controle automatizado de tráfego que utiliza Visão Computacional e Inteligência Artificial para detectar pedestres em áreas de espera e acionar ciclos semafóricos. Construído com Python, FastAPI, YOLO v8 e ByteTrack, operando com processamento em tempo real via stream de vídeo MJPEG.
 

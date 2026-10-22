@@ -1,0 +1,24 @@
+services:
+  data-api:
+    environment:
+      GEO_ENABLED: 'true'
+      GEO_PGHOST: geo-db
+      GEO_PGDATABASE: geometry
+      GEO_PGUSER: iot
+      GEO_PGPASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    depends_on:
+      geo-db: {condition: service_healthy}
+  geo-db:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_DB: geometry
+      POSTGRES_USER: iot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    volumes:
+      - geometry-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U iot -d geometry']
+      interval: 5s
+      retries: 20
+volumes:
+  geometry-data:

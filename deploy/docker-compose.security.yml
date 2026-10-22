@@ -1,0 +1,58 @@
+services:
+  registry:
+    environment: &oidc
+      OIDC_ISSUER: https://auth.localhost:8443/realms/iot
+      OIDC_JWKS_URL: http://keycloak:8080/realms/iot/protocol/openid-connect/certs
+      OIDC_AUDIENCE: iot-api
+      IOT_TENANTS: ${IOT_TENANTS:-semob,cooperativa}
+  data-api:
+    environment: *oidc
+  keycloak-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD_FILE: /run/secrets/keycloak-db-password
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+      - ./secrets/keycloak-db-password:/run/secrets/keycloak-db-password:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U keycloak -d keycloak']
+      interval: 5s
+      retries: 20
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    entrypoint: ['/bin/bash', '-ec']
+    command:
+      - 'export KC_DB_PASSWORD="$$(cat /run/secrets/keycloak-db-password)"; export KC_BOOTSTRAP_ADMIN_PASSWORD="$$(cat /run/secrets/keycloak-admin-password)"; exec /opt/keycloak/bin/kc.sh start --import-realm'
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_BOOTSTRAP_ADMIN_USERNAME: bootstrap-admin
+      KC_HOSTNAME: https://auth.localhost:8443
+      KC_HTTP_ENABLED: 'true'
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: 'true'
+      KC_METRICS_ENABLED: 'true'
+    volumes:
+      - ./keycloak/iot-realm.json:/opt/keycloak/data/import/iot-realm.json:ro
+      - ./secrets/keycloak-db-password:/run/secrets/keycloak-db-password:ro
+      - ./secrets/keycloak-admin-password:/run/secrets/keycloak-admin-password:ro
+    depends_on:
+      keycloak-db: {condition: service_healthy}
+  gateway:
+    image: traefik:v3.6
+    command:
+      - --entrypoints.websecure.address=:8443
+      - --providers.file.filename=/etc/traefik/routes.yml
+      - --accesslog=true
+      - --accesslog.format=json
+      - --metrics.prometheus=true
+    ports: ['127.0.0.1:8443:8443']
+    volumes:
+      - ./gateway/routes.yml:/etc/traefik/routes.yml:ro
+      - ./secrets/tls:/certs:ro
+    depends_on: [keycloak]
+volumes:
+  keycloak-db:

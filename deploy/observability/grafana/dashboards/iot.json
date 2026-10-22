@@ -1,0 +1,18 @@
+{
+  "uid":"iot-overview","title":"Plataforma IoT","schemaVersion":39,"version":1,
+  "refresh":"5s","time":{"from":"now-1h","to":"now"},
+  "panels":[
+    {"id":1,"title":"Mensagens por segundo","type":"timeseries","gridPos":{"x":0,"y":0,"w":12,"h":8},
+     "datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum by(stage) (rate(iot_messages_total[1m]))","legendFormat":"{{stage}}"}]},
+    {"id":2,"title":"p95 ingestão até persistência (s)","type":"timeseries","gridPos":{"x":12,"y":0,"w":12,"h":8},
+     "datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"histogram_quantile(0.95, sum by(le) (rate(iot_persistence_seconds_bucket[5m])))"}]},
+    {"id":3,"title":"Serviços disponíveis","type":"stat","gridPos":{"x":0,"y":8,"w":12,"h":6},
+     "datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"up{job=~\"iot-.*\"}","legendFormat":"{{instance}}"}]},
+    {"id":5,"title":"Alarmes ativos ou reconhecidos","type":"stat","gridPos":{"x":0,"y":14,"w":12,"h":6},
+     "datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"iot_active_alarms{instance=\"rules-worker:9100\"}"}]},
+    {"id":6,"title":"Idade do último estado (s)","type":"stat","gridPos":{"x":12,"y":14,"w":12,"h":6},
+     "datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"iot_latest_state_age_seconds{instance=\"rules-worker:9100\"}"}]},
+    {"id":4,"title":"Erros HTTP por segundo","type":"timeseries","gridPos":{"x":12,"y":8,"w":12,"h":6},
+     "datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum by(service) (rate(iot_http_requests_total{status=~\"4..|5..\"}[5m]))"}]}
+  ]
+}
