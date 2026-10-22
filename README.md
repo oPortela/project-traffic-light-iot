@@ -1,5 +1,10 @@
 # Sistema Semafórico Inteligente - Detecção de Pedestres
 
+> **Primeira entrega do roadmap:** monorepo, contratos canônico/AsyncAPI/OpenAPI,
+> infraestrutura Compose e semáforo MQTT. Guia: [primeira demonstração](docs/integrador/primeira-demo.md).
+> Veja [status e limites](docs/STATUS.md), [roadmap completo](docs/ROADMAP.md) e [ADRs](docs/adr/).
+> Catálogo, ingestão central, regras e borda pertencem às próximas entregas.
+
 Sistema de monitoramento e controle automatizado de tráfego que utiliza Visão Computacional e Inteligência Artificial para detectar pedestres em áreas de espera e acionar ciclos semafóricos. Construído com Python, FastAPI, YOLO v8 e ByteTrack, operando com processamento em tempo real via stream de vídeo MJPEG.
 
 ## 1. Visão Geral
@@ -46,8 +51,8 @@ O fluxo principal funciona em duas modalidades:
 
 ### Camada web e apresentação
 
-- app/main.py: inicializa a aplicação FastAPI e o servidor Uvicorn.
-- static/index.html: dashboard acessível via navegador para monitoramento da interseção. Exibe o feed demarcado com caixas delimitadoras, estado das luzes e botões para iniciar, parar e reiniciar a simulação.
+- projects/traffic-light/app/main.py: inicializa a aplicação FastAPI e o servidor Uvicorn.
+- projects/traffic-light/static/index.html: dashboard acessível via navegador para monitoramento da interseção. Exibe o feed demarcado com caixas delimitadoras, estado das luzes e botões para iniciar, parar e reiniciar a simulação.
 
 ## 4. Requisitos Funcionais
 
@@ -138,7 +143,7 @@ O código foi pensado para executar em um único processo, com threads separadas
 
 - Perfil: desenvolvedores e técnicos responsáveis pela infraestrutura do sistema.
 - Necessidade: testar a integridade das rotas da API, diagnosticar falhas e avaliar a lógica de controle.
-- Cenário: após ajustes de parâmetros, a equipe roda a suíte de testes em `tests/test_api.py` e `tests/test_controller.py` para validar o comportamento do semáforo.
+- Cenário: após ajustes de parâmetros, a equipe roda a suíte de testes em `projects/traffic-light/tests/test_api.py` e `projects/traffic-light/tests/test_controller.py` para validar o comportamento do semáforo.
 
 ## 12. Como Executar
 
@@ -157,7 +162,8 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Para reproduzir o ambiente já validado com versões fixadas:
+Para reproduzir o ambiente original de visão com versões fixadas (instale também
+`requirements-core.txt` para acrescentar MQTT):
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-lock.txt
@@ -166,7 +172,7 @@ Para reproduzir o ambiente já validado com versões fixadas:
 ### Execução local
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir projects/traffic-light --host 127.0.0.1 --port 8000
 ```
 
 A aplicação fica disponível em:
@@ -225,31 +231,30 @@ $env:YOLO_MODEL = "C:/caminho/para/modelo.pt"
 
 ```text
 project-traffic-light-iot/
-├── app/
-│   ├── __init__.py
-│   ├── controller.py          <- lógica da máquina de estados
-│   ├── main.py                <- API FastAPI, WebSocket e streaming de vídeo
-│   └── __pycache__
-├── static/
-│   ├── app.js                 <- front-end e interações com a API
-│   ├── index.html             <- interface da aplicação
-│   └── style.css              <- estilos visuais dos semáforos
-├── tests/
-│   ├── test_api.py
-│   └── test_controller.py
-├── .gitignore
+├── projects/traffic-light/   # app/, static/ e testes do semáforo
+├── projects/examples/       # cliente MQTT de demonstração
+├── iot_shared/              # validação e envelopes canônicos
+├── contracts/               # JSON Schema, AsyncAPI, OpenAPI e exemplos
+├── deploy/                  # Compose, broker, SQL e Dockerfile
+├── docs/                    # roadmap, ADRs, guia e status
+├── tests/                   # testes compartilhados de contrato
+├── scripts/                 # validação e smoke test com broker real
+├── .github/workflows/ci.yml
 ├── iniciar.bat
 ├── preparar_modelo.py
-├── README.md
-├── requirements.txt
-├── requirements-lock.txt
-└── .runtime/                  <- diretório de cache para modelos e configuração
+├── pyproject.toml
+├── requirements-core.txt    # demo/API/MQTT sem visão computacional
+├── requirements-dev-lock.txt
+├── requirements.txt         # aplicação com câmera
+└── requirements-lock.txt    # ambiente original de visão
 ```
 
 ## 15. Testes Automatizados
 
+Instale antes `requirements-dev-lock.txt` para reproduzir as ferramentas usadas nesta entrega.
+
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m pytest --cov --cov-report=term-missing
 ```
 
 Os testes cobrem a lógica de controle e os endpoints da API, ajudando a garantir que o comportamento do semáforo permaneça estável durante alterações futuras.

@@ -1,0 +1,11 @@
+{
+  "versao": "1.0",
+  "id_mensagem": "98eb4567-e89b-42d3-a456-426614174000",
+  "timestamp": "2026-10-22T12:00:00Z",
+  "inquilino": "semob",
+  "site": "centro",
+  "dominio": "mobilidade",
+  "dispositivo": "semaforo-travessia-01",
+  "tipo": "comando",
+  "dados": {"acao": "config", "parametros": {"wait": 10, "crossing": 8, "roi": [0.2, 0.15, 0.8, 0.95]}}
+}

@@ -1,0 +1,12 @@
+# Cadastro inicial. Cada credencial só acessa seus próprios tópicos.
+user semob-centro-semaforo-01
+topic write semob/centro/mobilidade/semaforo-travessia-01/telemetria
+topic write semob/centro/mobilidade/semaforo-travessia-01/evento
+topic write semob/centro/mobilidade/semaforo-travessia-01/estado
+topic read semob/centro/mobilidade/semaforo-travessia-01/comando
+
+user plataforma
+topic read +/+/+/+/telemetria
+topic read +/+/+/+/evento
+topic read +/+/+/+/estado
+topic write +/+/+/+/comando

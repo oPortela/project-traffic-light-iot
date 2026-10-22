@@ -1,0 +1,9 @@
+.git
+.venv
+.runtime
+**/__pycache__
+**/.env
+deploy/secrets
+*.pt
+.coverage
+.pytest_cache

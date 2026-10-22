@@ -7,5 +7,5 @@ if not exist ".venv\Scripts\python.exe" (
 )
 echo Abra http://127.0.0.1:8000 no navegador.
 echo Para encerrar, pressione Ctrl+C.
-".venv\Scripts\python.exe" -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+".venv\Scripts\python.exe" -m uvicorn app.main:app --app-dir projects/traffic-light --host 127.0.0.1 --port 8000
 pause

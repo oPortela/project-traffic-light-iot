@@ -6,3 +6,10 @@ runs/
 .pytest_cache/
 .runtime/
 Ultralytics/
+.env
+deploy/.env
+.coverage
+htmlcov/
+.ruff_cache/
+deploy/secrets/*
+!deploy/secrets/.gitkeep

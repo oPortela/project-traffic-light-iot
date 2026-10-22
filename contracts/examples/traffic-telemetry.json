@@ -1,0 +1,15 @@
+{
+  "versao": "1.0",
+  "id_mensagem": "88eb4567-e89b-42d3-a456-426614174000",
+  "timestamp": "2026-10-22T12:00:00Z",
+  "inquilino": "semob",
+  "site": "centro",
+  "dominio": "mobilidade",
+  "dispositivo": "semaforo-travessia-01",
+  "tipo": "telemetria",
+  "dados": {
+    "pedestres_na_area": {"valor": 2, "unidade": "1"},
+    "tempo_espera_s": {"valor": 5.3, "unidade": "s"},
+    "ciclos": {"valor": 1, "unidade": "1"}
+  }
+}

@@ -1,0 +1,158 @@
+openapi: 3.1.0
+info:
+  title: Travessia · Simulador IoT
+  version: 0.1.0
+paths:
+  /:
+    get:
+      summary: Index
+      operationId: index__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/state:
+    get:
+      summary: Snapshot
+      operationId: snapshot_api_state_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/control:
+    post:
+      summary: Control
+      operationId: control_api_control_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/config:
+    post:
+      summary: Configure
+      operationId: configure_api_config_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Configuration'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /video:
+    get:
+      summary: Video
+      operationId: video_video_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    Command:
+      properties:
+        action:
+          type: string
+          title: Action
+        mode:
+          type: string
+          title: Mode
+          default: demo
+        presence:
+          type: boolean
+          title: Presence
+          default: false
+      type: object
+      required:
+      - action
+      title: Command
+    Configuration:
+      properties:
+        wait:
+          type: number
+          maximum: 60.0
+          minimum: 1.0
+          title: Wait
+          default: 10
+        crossing:
+          type: number
+          maximum: 60.0
+          minimum: 2.0
+          title: Crossing
+          default: 8
+        roi:
+          items:
+            type: number
+          type: array
+          maxItems: 4
+          minItems: 4
+          title: Roi
+      type: object
+      required:
+      - roi
+      title: Configuration
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

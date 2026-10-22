@@ -22,6 +22,7 @@ state = {"mode": "demo", "running": False, "presence": False, "ids": [],
          "seen_at": 0, "camera_status": "desligada", "error": None,
          "roi": [0.2, 0.15, 0.8, 0.95], "generation": 0}
 frame = None
+integration = None
 
 
 class Command(BaseModel):
@@ -124,24 +125,58 @@ def tick_loop():
         with lock:
             now = time.monotonic()
             ids = []
+            previous_phase = controller.phase
             if state["running"]:
                 if state["mode"] == "demo":
                     ids = ["demo"] if state["presence"] else []
                 elif now - state["seen_at"] < 1:
                     ids = state["ids"]
                 controller.update(now, ids)
+            if integration is not None:
+                try:
+                    integration.observe(controller, state, now, len(ids), previous_phase)
+                except Exception:
+                    logging.exception("Telemetry publication failure")
 
 
 @asynccontextmanager
 async def lifespan(app):
+    global integration
     stop.clear()
+    publisher = None
+    if os.environ.get("MQTT_HOST"):
+        from app.integration import MqttPublisher, TrafficIntegration, identity_from_env
+
+        def on_command(data):
+            if data["acao"] == "config":
+                configure(Configuration.model_validate(data.get("parametros", {})))
+            elif data["acao"] in ("start", "stop", "reset"):
+                params = data.get("parametros", {})
+                control(Command(action=data["acao"], mode=params.get("mode", "demo")))
+            else:
+                raise ValueError("Unsupported remote command")
+
+        def on_reconnect():
+            with lock:
+                if integration is not None:
+                    integration.reported = None
+
+        identity = identity_from_env()
+        publisher = MqttPublisher(identity, on_command, on_reconnect)
+        integration = TrafficIntegration(publisher, identity)
+        publisher.start()
     threads = [threading.Thread(target=fn, daemon=True) for fn in (camera_loop, tick_loop)]
     for thread in threads:
         thread.start()
-    yield
-    stop.set()
-    for thread in threads:
-        thread.join(timeout=2)
+    try:
+        yield
+    finally:
+        stop.set()
+        for thread in threads:
+            thread.join(timeout=2)
+        if publisher is not None:
+            publisher.close()
+        integration = None
 
 
 app = FastAPI(title="Travessia · Simulador IoT", lifespan=lifespan)

@@ -1,0 +1,62 @@
+name: plataforma-iot
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    ports: ["127.0.0.1:1883:1883"]
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl:/mosquitto/config/acl:ro
+      - ./secrets/mosquitto.passwd:/mosquitto/config/passwords:ro
+      - mqtt-data:/mosquitto/data
+    healthcheck:
+      test: ["CMD-SHELL", "pidof mosquitto"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  postgres:
+    image: timescale/timescaledb:2.18.2-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: iot
+      POSTGRES_USER: iot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD em deploy/.env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iot -d iot"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  nats:
+    image: nats:2.10-alpine
+    restart: unless-stopped
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    volumes: ["nats-data:/data"]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  traffic-light:
+    profiles: ["demo"]
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.traffic-light
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_USERNAME: semob-centro-semaforo-01
+      MQTT_PASSWORD: ${MQTT_PASSWORD:?Defina MQTT_PASSWORD em deploy/.env}
+    depends_on:
+      mosquitto: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/state', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+volumes:
+  mqtt-data:
+  postgres-data:
+  nats-data:

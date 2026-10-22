@@ -1,0 +1,6 @@
+-r requirements-core.txt
+pytest>=8,<9
+pytest-cov>=6,<7
+ruff>=0.11,<1
+pip-audit>=2.9,<3
+PyYAML>=6,<7

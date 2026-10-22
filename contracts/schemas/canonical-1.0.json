@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:plataforma-iot:canonical:1.0",
+  "title": "Mensagem canônica da plataforma IoT v1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["versao", "id_mensagem", "timestamp", "inquilino", "site", "dominio", "dispositivo", "tipo", "dados"],
+  "properties": {
+    "versao": {"const": "1.0"},
+    "id_mensagem": {"type": "string", "format": "uuid"},
+    "timestamp": {"type": "string", "format": "date-time", "pattern": "Z$"},
+    "inquilino": {"$ref": "#/definitions/segment"},
+    "site": {"$ref": "#/definitions/segment"},
+    "dominio": {"$ref": "#/definitions/segment"},
+    "dispositivo": {"$ref": "#/definitions/segment"},
+    "tipo": {"enum": ["telemetria", "evento", "estado", "comando"]},
+    "dados": {"type": "object", "minProperties": 1}
+  },
+  "definitions": {
+    "segment": {"type": "string", "pattern": "^[a-zA-Z0-9_-]{1,64}$"},
+    "measure": {
+      "type": "object", "additionalProperties": false, "required": ["valor", "unidade"],
+      "properties": {"valor": {"type": "number"}, "unidade": {"type": "string", "minLength": 1, "maxLength": 32}}
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"tipo": {"const": "telemetria"}}}, "then": {
+      "properties": {"dados": {"type": "object", "minProperties": 1, "maxProperties": 100,
+        "propertyNames": {"$ref": "#/definitions/segment"}, "additionalProperties": {"$ref": "#/definitions/measure"}}}
+    }},
+    {"if": {"properties": {"tipo": {"const": "comando"}}}, "then": {
+      "properties": {"dados": {"type": "object", "required": ["acao"],
+        "properties": {"acao": {"type": "string", "minLength": 1}, "parametros": {"type": "object"}}, "additionalProperties": false}}
+    }}
+  ]
+}
